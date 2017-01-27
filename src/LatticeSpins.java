@@ -113,14 +113,13 @@ public class LatticeSpins {
 		return totE / 2.;
 	}
 	
-	public double getMagnetisation(){
+	public double magnetisationTotal(){
 		double mag = 0;
 		for(int i=0; i<this.N; i++)
 			for(int j=0; j<this.N; j++)
 				mag += this.spins[i][j];
 		return mag;
 	}
-	
 	
 	public double getRand(){
 		/*
@@ -234,6 +233,14 @@ public class LatticeSpins {
 		}
 	}
 	
+	public boolean isEqui(double totE1, double totE2){
+		
+		double relationE = Math.abs(totE1-totE2)/totE2;
+		if(relationE < 1 / Math.sqrt(this.N))
+			System.out.println("papas");
+		return false;
+	}
+	
 	public void dynamical(int numIterations, 
 			boolean glauber, boolean kawasaki) throws FileNotFoundException, UnsupportedEncodingException{
 		/*
@@ -249,14 +256,17 @@ public class LatticeSpins {
 			PrintWriter writer;
 			writer = new PrintWriter("out/M_vs_E.dat", "UTF-8");
 			int count = 0;
+			double energyTotal = this.energyTotal(),
+					energyTotalAux = energyTotal;
 			for(int i=0; i<this.getNumIterations(); i++){
 				int[] randSite = this.getRandSite();
 				if(glauber){
 					this.metropolis(randSite[0], randSite[1]);
 					if(i % (this.getNumIterations() / numFrames) == 0){
 						this.update();
-						writer.println(count + " " + this.energyTotal() + " " + 
-								this.getMagnetisation());
+						energyTotal = this.energyTotal();
+						writer.println(count + " " + energyTotal + " " + 
+								this.magnetisationTotal());
 						count += 1;
 					}
 				}else if(kawasaki){
@@ -264,9 +274,14 @@ public class LatticeSpins {
 					this.metropolisKawa(randSite, randSite2);
 					if(i % (this.getNumIterations() / numFrames) == 0){
 						this.update();
-						writer.println(count + " " + this.energyTotal() + " " + 
-								this.getMagnetisation());	
+						energyTotal = this.energyTotal();
+						writer.println(count + " " + energyTotal + " " + 
+								this.magnetisationTotal());	
 						count += 1;
+						if(count%5==0){
+							this.isEqui(energyTotal, energyTotalAux);
+							energyTotalAux = energyTotal;
+						}
 					}
 				}
 			}
