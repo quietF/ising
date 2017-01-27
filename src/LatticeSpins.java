@@ -4,8 +4,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-//import java.util.Timer;
-//import java.util.TimerTask;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 

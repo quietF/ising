@@ -1,0 +1,12 @@
+#!/bin/bash;
+# set term wxt enhanced;
+reset;
+set term postscript eps color enhanced font ",22";
+set output "glauber.eps";
+set xlabel "Steps ";
+set ylabel "Energy";
+set ytics nomirror;
+set y2label "Magnetisation";
+set autoscale y2;
+set y2tics;
+plot "M_vs_E.dat" u ($1):($2) axes x1y1 w l lc rgb 'red' t "Energy", "M_vs_E.dat" u ($1):($3) axes x1y2 w l lc rgb 'blue' t "Magnetisation";

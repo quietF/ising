@@ -6,6 +6,9 @@ public class Gotham2 {
 	
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 		Scanner in = new Scanner(System.in);
+		
+		System.out.println(System.getProperty("user.dir"));
+		
 		System.out.println("Enter the number of spins (N): ");
 		int N = in.nextInt();
 		System.out.println("Enter the temperature: ");
