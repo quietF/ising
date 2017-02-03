@@ -442,7 +442,7 @@ public class LatticeSpins {
 			int dataPoints = 50;
 			double N2 = this.N * this.N;
 			writer = new PrintWriter(datFile, "UTF-8");
-			if(rand) this.startRandom();
+			if(rand || !glauber) this.startRandom(); // Starting with all down in kawasaki will remain static.
 			else this.startDown();
 			this.T = minT;
 			this.dynamicalVoid(50000, glauber);
@@ -451,7 +451,8 @@ public class LatticeSpins {
 				double chi_max = 0., c_max = 0., chi_aux = 0., c_aux = 0.;
 				double Tc_chi = 0., Tc_c = 0.;
 				for(int i=0; i<dataPoints; i++){
-					this.T= minT + i * (maxT - minT)/dataPoints;
+					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
+					else this.T= minT + i * (maxT - minT)/dataPoints;
 					this.dynamicalVoid(10000, glauber);
 					chi_sig_c_sig = this.dynamical(nIterations, glauber);
 					System.out.println(i);
@@ -476,7 +477,8 @@ public class LatticeSpins {
 				double[] c_sig = new double[2];
 				double c_max = 0., c_aux = 0., Tc_c = 0.;
 				for(int i=0; i<dataPoints; i++){
-					this.T= minT + i * (maxT - minT)/dataPoints;
+					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
+					else this.T= minT + i * (maxT - minT)/dataPoints;
 					this.dynamicalVoid(10000, glauber);
 					c_sig = this.dynamical(nIterations, glauber);
 					System.out.println(i);
@@ -485,10 +487,11 @@ public class LatticeSpins {
 						c_max = c_aux;
 						Tc_c = this.T;
 					}
+					System.out.println(this.energyTotal());
 					writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
 						Math.abs(this.magnetisationTotal())/N2 + " " + 0 + 
 						" " + 0 + " " + c_sig[0] + " " +
-						c_sig[0]);
+						c_sig[1]);
 				}
 				writer.close();
 				System.out.println("Tc = " + Tc_c + " using c.");

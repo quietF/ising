@@ -28,7 +28,7 @@ public class Gotham2 {
 		
 		String outFile = "out/ising_alldown_N"+ N +"_T" + temp + ".dat";
 		int n = 10000;
-		Random.getData(outFile, temp, temp+5, n, dynamics, false);
+		Random.getData(outFile, temp, temp+5, n, dynamics, true);
 		
 	}
 

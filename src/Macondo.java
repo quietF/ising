@@ -26,11 +26,6 @@ public class Macondo {
 		
 		Random.dynamical(100000000, dynamics, dynamics);
 		
-		/*
-		 * 
-		 * For T=2 the stabilization of alldown is at 100000. 
-		 */
-		
 	}
 
 }
