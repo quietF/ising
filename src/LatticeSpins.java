@@ -30,6 +30,10 @@ public class LatticeSpins {
 			this.indexPlus = new int[this.N];
 			this.indexMinus = new int[this.N];
 			for(int i=0; i<this.N; i++){
+				/*
+				 * these arrays are used to deal with the periodicity 
+				 * of the spin lattice.
+				 */
 				this.indexPlus[i] = i+1;
 				this.indexMinus[i] = i-1;
 			}
@@ -44,12 +48,18 @@ public class LatticeSpins {
 	}
 	
 	public void startDown(){
+		/*
+		 * Initialise spins with S_i = -1 for all.
+		 */
 		for(int i=0; i<this.N; i++)
 			for(int j=0; j<this.N; j++)
-				this.spins[i][j] = 1;
+				this.spins[i][j] = -1;
 	}
 	
 	public void startRandom(){
+		/*
+		 * Initialise spins randomly.
+		 */
 		double prob;
 		for(int i=0; i<this.N; i++)
 			for(int j=0; j<this.N; j++){
@@ -61,8 +71,10 @@ public class LatticeSpins {
 	}
 	
 	public void init() {
-		
-		
+		/*
+		 * This generates the window with the initial configuration
+		 * of spins.
+		 */
 		this.f.setIgnoreRepaint(true);
 		this.f.setTitle("MonteCarlo with Metropolis");
 		this.f.setVisible(true);
@@ -81,6 +93,9 @@ public class LatticeSpins {
 	}
 
 	public void update() {
+		/*
+		 * Replot the spin arrangement
+		 */
 		for(int i=0; i<this.bi.getWidth(); i++)
 			for(int j=0; j<this.bi.getHeight(); j++)
 				this.bi.setRGB(i, j, this.spins[i][j] == 1 ? Color.BLACK.getRGB()
@@ -98,27 +113,29 @@ public class LatticeSpins {
 	}
 	
 	public double energyij(int i, int j){
+		/*
+		 * returns the energy of one spin's interaction
+		 * with its four neighbours.
+		 */
 		return - this.J * this.spins[i][j] * (
 				this.spins[indexPlus[i]][j] + 
 				this.spins[indexMinus[i]][j] +
 				this.spins[i][indexPlus[j]] +
 				this.spins[i][indexMinus[j]]);
-		/*double up = this.spins[this.indexMinus[i]][j];
-		double down = this.spins[this.indexPlus[i]][j];
-		double right = this.spins[i][this.indexPlus[j]];
-		double left = this.spins[i][this.indexMinus[j]];
-		return - this.J * this.spins[i][j] * (up + left + down + right);
-		*/
 	}
 	
 	public double energy1neigh(int[] ij1, int[] ij2){
+		/*
+		 * get the energy of the interaction between two
+		 * neighbouring spins.
+		 */
 		return - this.J * this.spins[ij1[0]][ij1[1]] * 
 				this.spins[ij2[0]][ij2[1]];
 	}
 	
 	public double energyTotal(){
 		/*
-		 * returns the total energy of the system.
+		 * returns the total energy of the spin lattice.
 		 */
 		double totE = 0;
 		for(int i=0; i<this.N; i++)
@@ -128,6 +145,9 @@ public class LatticeSpins {
 	}
 	
 	public double magnetisationTotal(){
+		/*
+		 * returns the magnetisation of the spin lattice.
+		 */
 		double mag = 0;
 		for(int i=0; i<this.N; i++)
 			for(int j=0; j<this.N; j++)
@@ -158,22 +178,20 @@ public class LatticeSpins {
 		int[] rand = {(int) (this.N * Math.random()), (int) (this.N * Math.random())};
 		return rand;
 	}
-	
-	public double avgSpins(){
-		double avg = 0;
-		for(int i=0; i<this.N; i++)
-			for(int j=0; j<this.N; j++)
-				avg += this.spins[i][j];
-		return avg / (this.N * this.N);
-	}
 
 	public void flipSpin(int i, int j){
+		/*
+		 * changes the value of a spin in position (i,j)
+		 */
 		if(this.spins[i][j] == 1) this.spins[i][j] = -1;
 		else if(this.spins[i][j] == -1) this.spins[i][j] = 1;
 		else System.out.println("Error. spins[i][j] should be +- 1.");
 	}
 	
 	public void swapSpin(int[] ij1, int[] ij2){
+		/*
+		 * swaps two spins in the specified positions.
+		 */
 		if(ij1[0] == ij2[0] && ij1[1] == ij2[1]) this.swapSpin(ij1, ij2);
 		else{
 			int aux = this.spins[ij1[0]][ij1[1]];
@@ -182,7 +200,10 @@ public class LatticeSpins {
 		}
 	}
 	
-	public boolean metropolis(int i, int j){
+	public boolean metropolisGlauber(int i, int j){
+		/*
+		 * run glauber dynamics
+		 */
 		double initialE = this.energyij(i, j);
 		this.flipSpin(i, j);
 		double finalE = this.energyij(i, j), dE = finalE - initialE;
@@ -194,7 +215,10 @@ public class LatticeSpins {
 		}
 	}
 	
-	public boolean metropolisKawa(int[] ij1, int[]ij2){
+	public boolean metropolisKawasaki(int[] ij1, int[]ij2){
+		/*
+		 * run kawasaki dynamics
+		 */
 		if(ij1[0] != ij2[0] && ij1[1] != ij2[1]){
 			if(ij1[0] == ij2[0] || ij1[1] == ij2[1]){
 				// Condition is fulfilled when the spins that want
@@ -235,7 +259,7 @@ public class LatticeSpins {
 		} else{
 			ij1 = this.getRandSite();
 			ij2 = this.getRandSite();
-			return this.metropolisKawa(ij1, ij2);
+			return this.metropolisKawasaki(ij1, ij2);
 		}
 	}
 	
@@ -258,7 +282,7 @@ public class LatticeSpins {
 		for(int i=0; i<this.getNumIterations(); i++){
 			int[] randSite = this.getRandSite();
 			if(glauber){
-				this.metropolis(randSite[0], randSite[1]);
+				this.metropolisGlauber(randSite[0], randSite[1]);
 				if(i % (this.getNumIterations() / numFrames) == 0){
 					if(visual)
 						this.update();
@@ -269,7 +293,7 @@ public class LatticeSpins {
 				}
 			}else{
 				int[] randSite2 = this.getRandSite();
-				this.metropolisKawa(randSite, randSite2);
+				this.metropolisKawasaki(randSite, randSite2);
 				if(i % (this.getNumIterations() / numFrames) == 0){
 					this.update();
 					energyTotal = this.energyTotal();
@@ -284,22 +308,22 @@ public class LatticeSpins {
 	
 	public void dynamical(PrintWriter writer, int numIterations, boolean glauber){
 		/*
-		 * get normalized magnetisation and energy
-		 * to normalize magnetisation: divide by N^2
-		 * to normalize energy: divide by 2JN^2 (the 
+		 * get normalised magnetisation and energy
+		 * to normalise magnetisation: divide by N^2
+		 * to normalise energy: divide by 2JN^2 (the 
 		 * energy of an all up/down set of N by N spins
 		 * is E_max = - 2 * J * N^2
 		 */
 		for(int i=0; i<numIterations; i++){
 			int[] randSite = this.getRandSite();
 			if(glauber){
-				this.metropolis(randSite[0], randSite[1]);
+				this.metropolisGlauber(randSite[0], randSite[1]);
 				writer.println(i + " " + this.energyTotal() / (2 * this.J * this.N * 
 						this.N) + " " + Math.abs(this.magnetisationTotal()) / 
 						(this.N * this.N));
 			}else{
 				int[] randSite2 = this.getRandSite();
-				this.metropolisKawa(randSite, randSite2);
+				this.metropolisKawasaki(randSite, randSite2);
 				writer.println(i + " " + this.energyTotal() + " " + 
 							Math.abs(this.magnetisationTotal()));	
 			}
@@ -307,33 +331,28 @@ public class LatticeSpins {
 	}
 	
 	public void dynamicalVoid(int numIterations, boolean glauber){
-		
-		 /* get normalized magnetisation and energy
-		 * to normalize magnetisation: divide by N^2
-		 * to normalize energy: divide by 2JN^2 (the 
+		 /* get normalised magnetisation and energy
+		 * to normalise magnetisation: divide by N^2
+		 * to normalise energy: divide by 2JN^2 (the 
 		 * energy of an all up/down set of N by N spins
 		 * is E_max = - 2 * J * N^2
 		 */
-		 
 		for(int i=0; i<numIterations; i++){
 			int[] randSite = this.getRandSite();
 			if(glauber){
-				this.metropolis(randSite[0], randSite[1]);
+				this.metropolisGlauber(randSite[0], randSite[1]);
 			}else{
 				int[] randSite2 = this.getRandSite();
-				this.metropolisKawa(randSite, randSite2);	
+				this.metropolisKawasaki(randSite, randSite2);	
 			}
 		}
 	}
 	
 	public double getFluctuations(double avgEorM, double avgE2orM2, boolean energy){
 		/*
-		 * input is avgEorM = <E> or <M>
-		 * and avgE2orM2 = <E^2> or <M^2>
-		 * boolean energy is true to get 
-		 * specific heat per spin (c=C/N)
-		 * and false to get the magnetic 
-		 * susceptibility (chi).
+		 * input is avgEorM = <E> or <M> and avgE2orM2 = <E^2> or <M^2>
+		 * boolean energy is true to get specific heat per spin (c=C/N)
+		 * and false to get the magnetic susceptibility (chi).
 		 */
 		double c_or_chi = (avgE2orM2 - avgEorM*avgEorM) / (this.N*this.kB*this.T);
 		if(energy) return c_or_chi / this.T;
@@ -344,8 +363,7 @@ public class LatticeSpins {
 			double sumM, double sumM2){
 		/*
 		 * returns magnetic susceptibility with its error
-		 * and specific heat per spin with its error (in 
-		 * that order).
+		 * and specific heat / N with its error (in that order).
 		 */
 		int n = E.length;
 		double[] chi_sd_c_sd = new double[4];
@@ -365,11 +383,31 @@ public class LatticeSpins {
 		return chi_sd_c_sd;
 	}
 	
+	public double[] getJacknifeKawasaki(double[] E, double sumE, double sumE2){
+		/*
+		 * returns specific spin / N with its error (in that order)
+		 */
+		int n = E.length;
+		double[] c_sd = new double[2];
+		c_sd[0] = this.getFluctuations(sumE/n, sumE2/n, true);
+		double c_i = 0.;
+		for(int i=0; i<n; i++){
+			c_i = this.getFluctuations((sumE-E[i])/(double)(n-1), 
+					(sumE2-E[i]*E[i])/(double)(n-1), true);
+			c_sd[1] += (c_i-c_sd[0])*(c_i-c_sd[0]);
+		}
+		c_sd[1] = Math.sqrt(c_sd[1]);
+		return c_sd;
+	}
+	
 	public double[] dynamical(int numIterations, boolean glauber){
 		/*
-		 * returns specific heat per spin and magnetic susceptibility
+		 * returns specific heat / N and magnetic susceptibility
 		 * c = C/N = (<E^2> - <E>^2) / (k T^2)	as in (23)/N in MVP01.pdf
 		 * chi = (<M^2> - <M>^2) / (N k T)		as in (22) in MVP01.pdf
+		 * 
+		 * if glauber = true: return chi, chi_error, c, c_error
+		 * if kakasaki: return c, c_error;
 		 */
 		double[] E = new double[numIterations], M = new double[numIterations];
 		double sumE = 0., sumM = 0., sumE2 = 0., sumM2 = 0.;
@@ -380,54 +418,81 @@ public class LatticeSpins {
 			sumE2 += E[i]*E[i];
 			sumM += M[i];
 			sumM2 += M[i]*M[i];
-			this.dynamicalVoid(10, glauber);
+			if(glauber) this.dynamicalVoid(100, glauber);
+			else this.dynamicalVoid(100, glauber);
 		}
-		return this.getJacknife(E, M, sumE, sumE2, sumM, sumM2);
-		
+		if(glauber) return this.getJacknife(E, M, sumE, sumE2, sumM, sumM2);
+		else return this.getJacknifeKawasaki(E, sumE, sumE2);
 	}
 	
-	public void getData(String datFile, double minT, double maxT, 
+	public void getData(String datFile, double minT, double maxT, int nIterations, 
 			boolean glauber, boolean rand){
 		/*
 		 * glauber == false means kawasaki (makes no sense).
-		 * rand == true means start with random spins (better
-		 * to use non-randomly generated spins).
+		 * if kawasaki dynamics are implemented, specific heat is
+		 * generated, but magnetic susceptibility is not.
+		 * rand == true means start with random spins.
 		 * 
+		 * The results generated will be inaccurate if rand == true
+		 * for a small value of temperature, or if rand == false
+		 * for a large value of temperature.
 		 */
 		PrintWriter writer;
 		try {
-			int dataPoints = 100;
-			double[] chi_sig_c_sig = new double[4];
+			int dataPoints = 50;
 			double N2 = this.N * this.N;
 			writer = new PrintWriter(datFile, "UTF-8");
 			if(rand) this.startRandom();
 			else this.startDown();
 			this.T = minT;
 			this.dynamicalVoid(50000, glauber);
-			double chi_max = 0., c_max = 0., chi_aux = 0., c_aux = 0.;
-			double Tc_chi = 0., Tc_c = 0.;
-			for(int i=0; i<dataPoints; i++){
-				this.T= minT + i * (maxT - minT)/dataPoints;
-				this.dynamicalVoid(100, glauber);
-				chi_sig_c_sig = this.dynamical(100000, glauber);
-				System.out.println(i);
-				chi_aux = chi_sig_c_sig[0];
-				if(chi_aux > chi_max){
-					chi_max = chi_aux;
-					Tc_chi = this.T;
-				}
-				c_aux = chi_sig_c_sig[2];
-				if(c_aux > c_max){
-					c_max = c_aux;
-					Tc_c = this.T;
-				}
-				writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
+			if(glauber){
+				double[] chi_sig_c_sig = new double[4];
+				double chi_max = 0., c_max = 0., chi_aux = 0., c_aux = 0.;
+				double Tc_chi = 0., Tc_c = 0.;
+				for(int i=0; i<dataPoints; i++){
+					this.T= minT + i * (maxT - minT)/dataPoints;
+					this.dynamicalVoid(10000, glauber);
+					chi_sig_c_sig = this.dynamical(nIterations, glauber);
+					System.out.println(i);
+					chi_aux = chi_sig_c_sig[0];
+					if(chi_aux > chi_max){
+						chi_max = chi_aux;
+						Tc_chi = this.T;
+					}
+					c_aux = chi_sig_c_sig[2];
+					if(c_aux > c_max){
+						c_max = c_aux;
+						Tc_c = this.T;
+					}
+					writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
 						Math.abs(this.magnetisationTotal())/N2 + " " + chi_sig_c_sig[0] + 
 						" " + chi_sig_c_sig[1] + " " + chi_sig_c_sig[2] + " " +
 						chi_sig_c_sig[3]);
+				}
+				writer.close();
+				System.out.println("Tc = " + Tc_chi + " using chi. Tc = " + Tc_c + " using c.");
+			} else{
+				double[] c_sig = new double[2];
+				double c_max = 0., c_aux = 0., Tc_c = 0.;
+				for(int i=0; i<dataPoints; i++){
+					this.T= minT + i * (maxT - minT)/dataPoints;
+					this.dynamicalVoid(10000, glauber);
+					c_sig = this.dynamical(nIterations, glauber);
+					System.out.println(i);
+					c_aux = c_sig[0];
+					if(c_aux > c_max){
+						c_max = c_aux;
+						Tc_c = this.T;
+					}
+					writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
+						Math.abs(this.magnetisationTotal())/N2 + " " + 0 + 
+						" " + 0 + " " + c_sig[0] + " " +
+						c_sig[0]);
+				}
+				writer.close();
+				System.out.println("Tc = " + Tc_c + " using c.");
 			}
-			writer.close();
-			System.out.println("Tc = " + Tc_chi + " using chi. Tc = " + Tc_c + " using c.");
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

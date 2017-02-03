@@ -26,14 +26,9 @@ public class Gotham2 {
 		
 		LatticeSpins Random = new LatticeSpins(N, temp);
 		
-		String outFile = "out/ising_allup_T" + temp + ".dat";
-
-		Random.getData(outFile, temp, temp+5, dynamics, false);
-		
-		/*
-		 * 
-		 * For T=2 the stabilization of alldown is at 100000. 
-		 */
+		String outFile = "out/ising_alldown_N"+ N +"_T" + temp + ".dat";
+		int n = 10000;
+		Random.getData(outFile, temp, temp+5, n, dynamics, false);
 		
 	}
 
