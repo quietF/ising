@@ -13,26 +13,18 @@ public class Macondo {
 		int N = in.nextInt();
 		System.out.println("Enter the temperature: ");
 		double temp = in.nextDouble();
-		System.out.println("Glauber dynamics? (y/n)");
+		System.out.println("Type glauber or kawasaki for their respective "
+				+ "dynamics. Default is glauber.");
 		String g = in.next();
-		boolean glaub = false, kawas = false;
-		if(g.equals("y") || g.equals("Y")){
-			glaub = true;
-			kawas = false;
-		} else{
-			System.out.println("Kawasaki dynamics? (y/n)");
-			g = in.next();
-			if(g.equals("y") || g.equals("Y")){
-				glaub = false;
-				kawas = true;
-			} else System.out.println("Then what do you want!");
-		}
+		boolean dynamics = true; // true means glauber.
+		if(g.equalsIgnoreCase("glauber")) dynamics = true;
+		else if(g.equalsIgnoreCase("kawasaki")) dynamics = false;
 		in.close();
 		
 		
 		LatticeSpins Random = new LatticeSpins(N, temp);
 		
-		Random.dynamical(100000000, glaub, kawas, true);
+		Random.dynamical(100000000, dynamics, dynamics);
 		
 		/*
 		 * 

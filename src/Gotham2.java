@@ -13,20 +13,14 @@ public class Gotham2 {
 		int N = in.nextInt();
 		System.out.println("Enter the temperature: ");
 		double temp = in.nextDouble();
-		System.out.println("Glauber dynamics? (y/n)");
+		System.out.println("Type glauber or kawasaki for their respective "
+				+ "dynamics. Default is glauber.");
 		String g = in.next();
-		boolean glaub = false, kawas = false;
-		if(g.equals("y") || g.equals("Y")){
-			glaub = true;
-			kawas = false;
-		} else{
-			System.out.println("Kawasaki dynamics? (y/n)");
-			g = in.next();
-			if(g.equals("y") || g.equals("Y")){
-				glaub = false;
-				kawas = true;
-			} else System.out.println("Then what do you want!");
-		}
+		boolean dynamics = true;
+		if(g.equalsIgnoreCase("glauber") || g.equalsIgnoreCase("g")) 
+			dynamics = true;
+		else if(g.equalsIgnoreCase("kawasaki") || g.equalsIgnoreCase("k")) 
+			dynamics = false;
 		in.close();
 		
 		
@@ -34,7 +28,7 @@ public class Gotham2 {
 		
 		String outFile = "out/ising_allup_T" + temp + ".dat";
 
-		Random.getData(outFile, temp, temp+5, glaub, false);
+		Random.getData(outFile, temp, temp+5, dynamics, false);
 		
 		/*
 		 * 

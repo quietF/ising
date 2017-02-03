@@ -240,50 +240,46 @@ public class LatticeSpins {
 	}
 	
 	public void dynamical(int numIterations, 
-			boolean glauber, boolean kawasaki, boolean visual) 
+			boolean glauber, boolean visual) 
 					throws FileNotFoundException, UnsupportedEncodingException{
 		/*
 		 * loops over numIterations with the desired dynamics
 		 * writes E and M into the out/M_vs_E.dat file.
 		 */
 		this.startRandom();
-		if(glauber && kawasaki){
-			System.out.println("Only one type of dynamics at a time.");
-		}else if(glauber || kawasaki){
-			int numFrames = 1000;
-			this.setNumIterations(numIterations);
-			if(visual)
-				this.init();
-			PrintWriter writer;
-			writer = new PrintWriter("out/M_vs_E.dat", "UTF-8");
-			int count = 0;
-			double energyTotal = this.energyTotal();
-			for(int i=0; i<this.getNumIterations(); i++){
-				int[] randSite = this.getRandSite();
-				if(glauber){
-					this.metropolis(randSite[0], randSite[1]);
-					if(i % (this.getNumIterations() / numFrames) == 0){
-						if(visual)
-							this.update();
-						energyTotal = this.energyTotal();
-						writer.println(count + " " + energyTotal + " " + 
-								this.magnetisationTotal());
-						count += 1;
-					}
-				}else if(kawasaki){
-					int[] randSite2 = this.getRandSite();
-					this.metropolisKawa(randSite, randSite2);
-					if(i % (this.getNumIterations() / numFrames) == 0){
+		int numFrames = 1000;
+		this.setNumIterations(numIterations);
+		if(visual)
+			this.init();
+		PrintWriter writer;
+		writer = new PrintWriter("out/M_vs_E.dat", "UTF-8");
+		int count = 0;
+		double energyTotal = this.energyTotal();
+		for(int i=0; i<this.getNumIterations(); i++){
+			int[] randSite = this.getRandSite();
+			if(glauber){
+				this.metropolis(randSite[0], randSite[1]);
+				if(i % (this.getNumIterations() / numFrames) == 0){
+					if(visual)
 						this.update();
-						energyTotal = this.energyTotal();
-						writer.println(count + " " + energyTotal + " " + 
-								this.magnetisationTotal());	
-						count += 1;
-					}
+					energyTotal = this.energyTotal();
+					writer.println(count + " " + energyTotal + " " + 
+							this.magnetisationTotal());
+					count += 1;
+				}
+			}else{
+				int[] randSite2 = this.getRandSite();
+				this.metropolisKawa(randSite, randSite2);
+				if(i % (this.getNumIterations() / numFrames) == 0){
+					this.update();
+					energyTotal = this.energyTotal();
+					writer.println(count + " " + energyTotal + " " + 
+							this.magnetisationTotal());	
+					count += 1;
 				}
 			}
-			writer.close();
-		}else System.out.println("Both dynamics cannot be false.");
+		}
+		writer.close();
 	}
 	
 	public void dynamical(PrintWriter writer, int numIterations, boolean glauber){
