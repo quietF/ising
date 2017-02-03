@@ -466,10 +466,13 @@ public class LatticeSpins {
 						c_max = c_aux;
 						Tc_c = this.T;
 					}
-					writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
-						Math.abs(this.magnetisationTotal())/N2 + " " + chi_sig_c_sig[0] + 
-						" " + chi_sig_c_sig[1] + " " + chi_sig_c_sig[2] + " " +
-						chi_sig_c_sig[3]);
+					writer.println(this.T + " " + 							// 1. Temperature
+							this.energyTotal()/(2*N2*this.J) + " " + 		// 2. Normalised energy
+							Math.abs(this.magnetisationTotal())/N2 + 		// 3. Normalised magnetisation
+							" " + chi_sig_c_sig[0] + " " + 					// 4. Magnetic susceptibility (chi)
+							chi_sig_c_sig[1] + " " + 						// 5. Error in chi 
+							chi_sig_c_sig[2] + " " +						// 6. Specific heat (c = Cv / N)
+							chi_sig_c_sig[3]);								// 7. Error in c
 				}
 				writer.close();
 				System.out.println("Tc = " + Tc_chi + " using chi. Tc = " + Tc_c + " using c.");
@@ -479,7 +482,7 @@ public class LatticeSpins {
 				for(int i=0; i<dataPoints; i++){
 					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
 					else this.T= minT + i * (maxT - minT)/dataPoints;
-					this.dynamicalVoid(100000, glauber);
+					this.dynamicalVoid(10000, glauber);
 					c_sig = this.dynamical(nIterations, glauber);
 					System.out.println(i);
 					c_aux = c_sig[0];
@@ -488,10 +491,13 @@ public class LatticeSpins {
 						Tc_c = this.T;
 					}
 					System.out.println(this.energyTotal());
-					writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
-						Math.abs(this.magnetisationTotal())/N2 + " " + 0 + 
-						" " + 0 + " " + c_sig[0] + " " +
-						c_sig[1]);
+					writer.println(this.T + " " + 							// 1. Temperature
+							this.energyTotal()/(2*N2*this.J) +				// 2. Normalised energy
+							" " + Math.abs(this.magnetisationTotal())/N2 +	// 3. Normalised magnetisation
+							" " + 0 + " " + 								// 4. Magnetic susceptibility (chi)
+							0 + " " + 										// 5. Error in chi
+							c_sig[0] + " " +								// 6. Specific heat (c = Cv / N)
+							c_sig[1]);										// 7. Error in c
 				}
 				writer.close();
 				System.out.println("Tc = " + Tc_c + " using c.");

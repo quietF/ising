@@ -4,6 +4,18 @@ import java.util.Scanner;
 
 public class Gotham2 {
 	
+	public static boolean readDynamics(Scanner in){
+		System.out.println("Type glauber or kawasaki for their respective "
+				+ "dynamics. Default is glauber.");
+		boolean dynamics = true;
+		String g = in.next();
+		if(g.equalsIgnoreCase("glauber") || g.equalsIgnoreCase("g")) 
+			dynamics = true;
+		else if(g.equalsIgnoreCase("kawasaki") || g.equalsIgnoreCase("k")) 
+			dynamics = false;
+		return dynamics;
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 		Scanner in = new Scanner(System.in);
 		
@@ -13,14 +25,7 @@ public class Gotham2 {
 		int N = in.nextInt();
 		System.out.println("Enter the temperature: ");
 		double temp = in.nextDouble();
-		System.out.println("Type glauber or kawasaki for their respective "
-				+ "dynamics. Default is glauber.");
-		String g = in.next();
-		boolean dynamics = true;
-		if(g.equalsIgnoreCase("glauber") || g.equalsIgnoreCase("g")) 
-			dynamics = true;
-		else if(g.equalsIgnoreCase("kawasaki") || g.equalsIgnoreCase("k")) 
-			dynamics = false;
+		boolean dynamics = readDynamics(in);
 		in.close();
 		
 		
@@ -28,7 +33,7 @@ public class Gotham2 {
 		
 		String outFile = "out/ising_alldown_N"+ N +"_T" + temp + ".dat";
 		int n = 10000;
-		Random.getData(outFile, temp, temp+5, n, dynamics, false);
+		Random.getData(outFile, temp, 6, n, dynamics, false);
 		
 	}
 
