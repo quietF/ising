@@ -479,7 +479,7 @@ public class LatticeSpins {
 				for(int i=0; i<dataPoints; i++){
 					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
 					else this.T= minT + i * (maxT - minT)/dataPoints;
-					this.dynamicalVoid(10000, glauber);
+					this.dynamicalVoid(100000, glauber);
 					c_sig = this.dynamical(nIterations, glauber);
 					System.out.println(i);
 					c_aux = c_sig[0];
