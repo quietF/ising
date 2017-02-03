@@ -27,12 +27,19 @@ public class Gotham2 {
 				kawas = true;
 			} else System.out.println("Then what do you want!");
 		}
-		int n = 100000000;
 		in.close();
 		
 		
 		LatticeSpins Random = new LatticeSpins(N, temp);
-		Random.dynamical(n, glaub, kawas);
+		
+		String outFile = "out/ising_allup_T" + temp + ".dat";
+
+		Random.getData(outFile, temp, temp+5, glaub, false);
+		
+		/*
+		 * 
+		 * For T=2 the stabilization of alldown is at 100000. 
+		 */
 		
 	}
 

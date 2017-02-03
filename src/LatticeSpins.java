@@ -35,34 +35,43 @@ public class LatticeSpins {
 			}
 			this.indexMinus[0] = this.N-1;
 			this.indexPlus[this.N-1] = 0;
-			double prob;
 
-			for(int i=0; i<this.N; i++)
-				for(int j=0; j<this.N; j++){
-					prob = this.getRand();
-					if(prob > 0) this.spins[i][j] = 1;
-					else if(prob < 0) this.spins[i][j] = -1;
-					else System.out.println("Error.");
-				}
-			
 			this.bi = new BufferedImage(this.N, this.N, 
 					BufferedImage.TYPE_INT_RGB);
-			
-			this.f.setIgnoreRepaint(true);
-			this.f.setTitle("MonteCarlo with Metropolis");
-			this.f.setVisible(true);
-			this.f.setSize(this.N, this.N + this.f.getInsets().top);
-			//this.f.setExtendedState(Frame.MAXIMIZED_BOTH);
-			this.f.addWindowListener(new WindowAdapter() 
-			{public void windowClosing(WindowEvent we) {System.exit(0);}});
-			
-			this.init();
 			
 		} else throw new IllegalArgumentException("Neither number of spins nor"
 				+ "temperature can be zero.");
 	}
 	
+	public void startDown(){
+		for(int i=0; i<this.N; i++)
+			for(int j=0; j<this.N; j++)
+				this.spins[i][j] = 1;
+	}
+	
+	public void startRandom(){
+		double prob;
+		for(int i=0; i<this.N; i++)
+			for(int j=0; j<this.N; j++){
+				prob = this.getRand();
+				if(prob > 0) this.spins[i][j] = 1;
+				else if(prob < 0) this.spins[i][j] = -1;
+				else System.out.println("Error.");
+			}
+	}
+	
 	public void init() {
+		
+		
+		this.f.setIgnoreRepaint(true);
+		this.f.setTitle("MonteCarlo with Metropolis");
+		this.f.setVisible(true);
+		this.f.setSize(this.N, this.N + this.f.getInsets().top);
+		//this.f.setExtendedState(Frame.MAXIMIZED_BOTH);
+		this.f.addWindowListener(new WindowAdapter() 
+		{public void windowClosing(WindowEvent we) {System.exit(0);}});
+		
+		
 		for (int i = 0; i < this.bi.getWidth(); i++) 
 			for (int j = 0; j < this.bi.getHeight(); j++) 
 				this.bi.setRGB(i, j, this.spins[i][j] == 1 ? Color.BLACK.getRGB()
@@ -89,12 +98,17 @@ public class LatticeSpins {
 	}
 	
 	public double energyij(int i, int j){
-		double up = this.spins[this.indexMinus[i]][j];
+		return - this.J * this.spins[i][j] * (
+				this.spins[indexPlus[i]][j] + 
+				this.spins[indexMinus[i]][j] +
+				this.spins[i][indexPlus[j]] +
+				this.spins[i][indexMinus[j]]);
+		/*double up = this.spins[this.indexMinus[i]][j];
 		double down = this.spins[this.indexPlus[i]][j];
 		double right = this.spins[i][this.indexPlus[j]];
 		double left = this.spins[i][this.indexMinus[j]];
 		return - this.J * this.spins[i][j] * (up + left + down + right);
-
+		*/
 	}
 	
 	public double energy1neigh(int[] ij1, int[] ij2){
@@ -144,14 +158,6 @@ public class LatticeSpins {
 		int[] rand = {(int) (this.N * Math.random()), (int) (this.N * Math.random())};
 		return rand;
 	}
-	
-	/*public void displaySpins(){
-		for(int i=0; i<this.N; i++){
-			for(int j=0; j<this.N; j++)
-				System.out.printf("%d ", this.spins[i][j]);
-			System.out.println();
-		}
-	}*/
 	
 	public double avgSpins(){
 		double avg = 0;
@@ -233,37 +239,32 @@ public class LatticeSpins {
 		}
 	}
 	
-	public boolean isEqui(double totE1, double totE2){
-		
-		double relationE = Math.abs(totE1-totE2)/totE2;
-		if(relationE < 1 / Math.sqrt(this.N))
-			System.out.println("papas");
-		return false;
-	}
-	
 	public void dynamical(int numIterations, 
-			boolean glauber, boolean kawasaki) throws FileNotFoundException, UnsupportedEncodingException{
+			boolean glauber, boolean kawasaki, boolean visual) 
+					throws FileNotFoundException, UnsupportedEncodingException{
 		/*
 		 * loops over numIterations with the desired dynamics
 		 * writes E and M into the out/M_vs_E.dat file.
 		 */
+		this.startRandom();
 		if(glauber && kawasaki){
 			System.out.println("Only one type of dynamics at a time.");
 		}else if(glauber || kawasaki){
-			int numFrames = 100;
+			int numFrames = 1000;
 			this.setNumIterations(numIterations);
-			this.init();
+			if(visual)
+				this.init();
 			PrintWriter writer;
 			writer = new PrintWriter("out/M_vs_E.dat", "UTF-8");
 			int count = 0;
-			double energyTotal = this.energyTotal(),
-					energyTotalAux = energyTotal;
+			double energyTotal = this.energyTotal();
 			for(int i=0; i<this.getNumIterations(); i++){
 				int[] randSite = this.getRandSite();
 				if(glauber){
 					this.metropolis(randSite[0], randSite[1]);
 					if(i % (this.getNumIterations() / numFrames) == 0){
-						this.update();
+						if(visual)
+							this.update();
 						energyTotal = this.energyTotal();
 						writer.println(count + " " + energyTotal + " " + 
 								this.magnetisationTotal());
@@ -278,14 +279,162 @@ public class LatticeSpins {
 						writer.println(count + " " + energyTotal + " " + 
 								this.magnetisationTotal());	
 						count += 1;
-						if(count%5==0){
-							this.isEqui(energyTotal, energyTotalAux);
-							energyTotalAux = energyTotal;
-						}
 					}
 				}
 			}
 			writer.close();
 		}else System.out.println("Both dynamics cannot be false.");
+	}
+	
+	public void dynamical(PrintWriter writer, int numIterations, boolean glauber){
+		/*
+		 * get normalized magnetisation and energy
+		 * to normalize magnetisation: divide by N^2
+		 * to normalize energy: divide by 2JN^2 (the 
+		 * energy of an all up/down set of N by N spins
+		 * is E_max = - 2 * J * N^2
+		 */
+		for(int i=0; i<numIterations; i++){
+			int[] randSite = this.getRandSite();
+			if(glauber){
+				this.metropolis(randSite[0], randSite[1]);
+				writer.println(i + " " + this.energyTotal() / (2 * this.J * this.N * 
+						this.N) + " " + Math.abs(this.magnetisationTotal()) / 
+						(this.N * this.N));
+			}else{
+				int[] randSite2 = this.getRandSite();
+				this.metropolisKawa(randSite, randSite2);
+				writer.println(i + " " + this.energyTotal() + " " + 
+							Math.abs(this.magnetisationTotal()));	
+			}
+		}
+	}
+	
+	public void dynamicalVoid(int numIterations, boolean glauber){
+		
+		 /* get normalized magnetisation and energy
+		 * to normalize magnetisation: divide by N^2
+		 * to normalize energy: divide by 2JN^2 (the 
+		 * energy of an all up/down set of N by N spins
+		 * is E_max = - 2 * J * N^2
+		 */
+		 
+		for(int i=0; i<numIterations; i++){
+			int[] randSite = this.getRandSite();
+			if(glauber){
+				this.metropolis(randSite[0], randSite[1]);
+			}else{
+				int[] randSite2 = this.getRandSite();
+				this.metropolisKawa(randSite, randSite2);	
+			}
+		}
+	}
+	
+	public double getFluctuations(double avgEorM, double avgE2orM2, boolean energy){
+		/*
+		 * input is avgEorM = <E> or <M>
+		 * and avgE2orM2 = <E^2> or <M^2>
+		 * boolean energy is true to get 
+		 * specific heat per spin (c=C/N)
+		 * and false to get the magnetic 
+		 * susceptibility (chi).
+		 */
+		double c_or_chi = (avgE2orM2 - avgEorM*avgEorM) / (this.N*this.kB*this.T);
+		if(energy) return c_or_chi / this.T;
+		else return c_or_chi;
+	}
+	
+	public double[] getJacknife(double[] E, double[] M, double sumE, double sumE2, 
+			double sumM, double sumM2){
+		/*
+		 * returns magnetic susceptibility with its error
+		 * and specific heat per spin with its error (in 
+		 * that order).
+		 */
+		int n = E.length;
+		double[] chi_sd_c_sd = new double[4];
+		chi_sd_c_sd[0] = this.getFluctuations(sumM/n, sumM2/n, false);
+		chi_sd_c_sd[2] = this.getFluctuations(sumE/n, sumE2/n, true);
+		double chi_i = 0., c_i = 0.;
+		for(int i=0; i<n; i++){
+			chi_i = this.getFluctuations((sumM-M[i])/(double)(n-1), 
+					(sumM2-M[i]*M[i])/(double)(n-1), false);
+			c_i = this.getFluctuations((sumE-E[i])/(double)(n-1), 
+					(sumE2-E[i]*E[i])/(double)(n-1), true);
+			chi_sd_c_sd[1] += (chi_i-chi_sd_c_sd[0])*(chi_i-chi_sd_c_sd[0]);
+			chi_sd_c_sd[3] += (c_i-chi_sd_c_sd[2])*(c_i-chi_sd_c_sd[2]);
+		}
+		chi_sd_c_sd[1] = Math.sqrt(chi_sd_c_sd[1]);
+		chi_sd_c_sd[3] = Math.sqrt(chi_sd_c_sd[3]);
+		return chi_sd_c_sd;
+	}
+	
+	public double[] dynamical(int numIterations, boolean glauber){
+		/*
+		 * returns specific heat per spin and magnetic susceptibility
+		 * c = C/N = (<E^2> - <E>^2) / (k T^2)	as in (23)/N in MVP01.pdf
+		 * chi = (<M^2> - <M>^2) / (N k T)		as in (22) in MVP01.pdf
+		 */
+		double[] E = new double[numIterations], M = new double[numIterations];
+		double sumE = 0., sumM = 0., sumE2 = 0., sumM2 = 0.;
+		for(int i=0; i<numIterations; i++){
+			E[i] = this.energyTotal();
+			M[i] = Math.abs(this.magnetisationTotal());
+			sumE += E[i];
+			sumE2 += E[i]*E[i];
+			sumM += M[i];
+			sumM2 += M[i]*M[i];
+			this.dynamicalVoid(10, glauber);
+		}
+		return this.getJacknife(E, M, sumE, sumE2, sumM, sumM2);
+		
+	}
+	
+	public void getData(String datFile, double minT, double maxT, 
+			boolean glauber, boolean rand){
+		/*
+		 * glauber == false means kawasaki (makes no sense).
+		 * rand == true means start with random spins (better
+		 * to use non-randomly generated spins).
+		 * 
+		 */
+		PrintWriter writer;
+		try {
+			int dataPoints = 100;
+			double[] chi_sig_c_sig = new double[4];
+			double N2 = this.N * this.N;
+			writer = new PrintWriter(datFile, "UTF-8");
+			if(rand) this.startRandom();
+			else this.startDown();
+			this.T = minT;
+			this.dynamicalVoid(50000, glauber);
+			double chi_max = 0., c_max = 0., chi_aux = 0., c_aux = 0.;
+			double Tc_chi = 0., Tc_c = 0.;
+			for(int i=0; i<dataPoints; i++){
+				this.T= minT + i * (maxT - minT)/dataPoints;
+				this.dynamicalVoid(100, glauber);
+				chi_sig_c_sig = this.dynamical(100000, glauber);
+				System.out.println(i);
+				chi_aux = chi_sig_c_sig[0];
+				if(chi_aux > chi_max){
+					chi_max = chi_aux;
+					Tc_chi = this.T;
+				}
+				c_aux = chi_sig_c_sig[2];
+				if(c_aux > c_max){
+					c_max = c_aux;
+					Tc_c = this.T;
+				}
+				writer.println(this.T + " " + this.energyTotal()/(2*N2*this.J) + " " + 
+						Math.abs(this.magnetisationTotal())/N2 + " " + chi_sig_c_sig[0] + 
+						" " + chi_sig_c_sig[1] + " " + chi_sig_c_sig[2] + " " +
+						chi_sig_c_sig[3]);
+			}
+			writer.close();
+			System.out.println("Tc = " + Tc_chi + " using chi. Tc = " + Tc_c + " using c.");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
