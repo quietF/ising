@@ -1,0 +1,10 @@
+reset;
+ set title 'N=500';
+ set xlabel 'Temperature';
+ set ylabel 'Magnetic Susceptibility';
+ p[][0:1.1] 'out/ising_alldown_N500_T0.1.dat' u 1:4:5 w errorbars t "";
+ rep 'out/ising_alldown_N500_T0.1.dat' u 1:4 pt 6 lc rgb 'black' t "";
+ set term postscript eps enhanced color font ",17";
+ set out 'img/chi_N500k.eps';
+ replot;
+

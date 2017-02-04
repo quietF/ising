@@ -1,0 +1,10 @@
+reset;
+ set title 'N=50';
+ set xlabel 'Temperature';
+ set xrange[0:6];
+ set ylabel 'Magnetisation';
+ p 'out/ising_alldown_N50_T0.1.dat' u 1:3 w l lw 2 lc rgb "dark-green"t "";
+ set term postscript eps enhanced color font ",17";
+ set out 'img/magnetisation_N50g.eps';
+ replot;
+

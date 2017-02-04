@@ -450,12 +450,16 @@ public class LatticeSpins {
 				double[] chi_sig_c_sig = new double[4];
 				double chi_max = 0., c_max = 0., chi_aux = 0., c_aux = 0.;
 				double Tc_chi = 0., Tc_c = 0.;
+                double[] temperature = new double[dataPoints], energy = new double[dataPoints],
+                            magnetisation = new double[dataPoints], chi = new double[dataPoints], 
+                            chi_sd = new double[dataPoints], c = new double[dataPoints], 
+                            c_sd = new double[dataPoints];
 				for(int i=0; i<dataPoints; i++){
-					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
-					else this.T= minT + i * (maxT - minT)/dataPoints;
+					if(rand) this.T = maxT - i * (maxT - minT)/(dataPoints-1);
+					else this.T= minT + i * (maxT - minT)/(dataPoints-1);
 					this.dynamicalVoid(10000, glauber);
 					chi_sig_c_sig = this.dynamical(nIterations, glauber);
-					System.out.println(i);
+					System.out.printf("%.1f percent\r", 100*(double)i/(double)dataPoints);
 					chi_aux = chi_sig_c_sig[0];
 					if(chi_aux > chi_max){
 						chi_max = chi_aux;
@@ -466,39 +470,73 @@ public class LatticeSpins {
 						c_max = c_aux;
 						Tc_c = this.T;
 					}
-					writer.println(this.T + " " + 							// 1. Temperature
+                    temperature[i] = this.T;
+                    energy[i] = this.energyTotal()/(2*N2*this.J);
+                    magnetisation[i] = Math.abs(this.magnetisationTotal())/N2;
+                    chi[i] = chi_sig_c_sig[0];
+                    chi_sd[i] = chi_sig_c_sig[1];
+                    c[i] = chi_sig_c_sig[2];
+                    c_sd[i] = chi_sig_c_sig[3];
+					/*writer.println(this.T + " " + 							// 1. Temperature
 							this.energyTotal()/(2*N2*this.J) + " " + 		// 2. Normalised energy
 							Math.abs(this.magnetisationTotal())/N2 + 		// 3. Normalised magnetisation
 							" " + chi_sig_c_sig[0] + " " + 					// 4. Magnetic susceptibility (chi)
 							chi_sig_c_sig[1] + " " + 						// 5. Error in chi 
 							chi_sig_c_sig[2] + " " +						// 6. Specific heat (c = Cv / N)
 							chi_sig_c_sig[3]);								// 7. Error in c
+                    */
 				}
+                for(int i=0; i<dataPoints; i++){
+                    writer.println(temperature[i] + " " +   // 1. Temperature
+							energy[i] + " " + 		        // 2. Normalised energy
+							magnetisation[i] + " " +        // 3. Normalised magnetisation
+							chi[i]/chi_max + " " +          // 4. Magnetic susceptibility (chi)
+							chi_sd[i]/chi_max + " " + 	    // 5. Error in chi 
+							c[i]/c_max + " " +              // 6. Specific heat (c = Cv / N)
+							c_sd[i]/c_max);       		    // 7. Error in c
+                }
 				writer.close();
 				System.out.println("Tc = " + Tc_chi + " using chi. Tc = " + Tc_c + " using c.");
 			} else{
 				double[] c_sig = new double[2];
 				double c_max = 0., c_aux = 0., Tc_c = 0.;
+                double[] temperature = new double[dataPoints], energy = new double[dataPoints],
+                            magnetisation = new double[dataPoints], chi = new double[dataPoints], 
+                            chi_sd = new double[dataPoints], c = new double[dataPoints], 
+                            c_sd = new double[dataPoints];
 				for(int i=0; i<dataPoints; i++){
-					if(rand) this.T = maxT - i * (maxT - minT)/dataPoints;
-					else this.T= minT + i * (maxT - minT)/dataPoints;
+					this.T = maxT - i * (maxT - minT)/(dataPoints-1);
 					this.dynamicalVoid(10000, glauber);
 					c_sig = this.dynamical(nIterations, glauber);
-					System.out.println(i);
+					System.out.printf("%.1f percent\r", 100*(double)i/(double)dataPoints);
 					c_aux = c_sig[0];
 					if(c_aux > c_max){
 						c_max = c_aux;
 						Tc_c = this.T;
 					}
-					System.out.println(this.energyTotal());
-					writer.println(this.T + " " + 							// 1. Temperature
+                    temperature[i] = this.T;
+                    energy[i] = this.energyTotal()/(2*N2*this.J);
+                    magnetisation[i] = Math.abs(this.magnetisationTotal())/N2;
+                    c[i] = c_sig[0];
+                    c_sd[i] = c_sig[1];
+					/*writer.println(this.T + " " + 							// 1. Temperature
 							this.energyTotal()/(2*N2*this.J) +				// 2. Normalised energy
 							" " + Math.abs(this.magnetisationTotal())/N2 +	// 3. Normalised magnetisation
 							" " + 0 + " " + 								// 4. Magnetic susceptibility (chi)
 							0 + " " + 										// 5. Error in chi
 							c_sig[0] + " " +								// 6. Specific heat (c = Cv / N)
 							c_sig[1]);										// 7. Error in c
+                    */
 				}
+                for(int i=0; i<dataPoints; i++){
+                    writer.println(temperature[i] + " " +   // 1. Temperature
+							energy[i] + " " + 		        // 2. Normalised energy
+							magnetisation[i] + " " +        // 3. Normalised magnetisation
+							0 + " " +                       // 4. Magnetic susceptibility (chi)
+							0 + " " + 	                    // 5. Error in chi 
+							c[i]/c_max + " " +              // 6. Specific heat (c = Cv / N)
+							c_sd[i]/c_max);       		    // 7. Error in c
+                }
 				writer.close();
 				System.out.println("Tc = " + Tc_c + " using c.");
 			}

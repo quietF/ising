@@ -1,1 +1,0 @@
-reset;\n set term png;\n set xlabel "Temperature"; set ylabel ;
