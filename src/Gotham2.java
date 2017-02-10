@@ -31,6 +31,9 @@ public class Gotham2 {
 		
 		LatticeSpins Random = new LatticeSpins(N, temp);
 		
+		//Random.startRandom();
+		//Random.dynamical(100000000, dynamics, true);
+		
 		String outFile = "out/ising_alldown_N"+ N +"_T" + temp + ".dat";
 		int n = 10000;
 		Random.getData(outFile, temp, 6, n, dynamics, false);

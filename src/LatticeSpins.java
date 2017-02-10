@@ -275,10 +275,6 @@ public class LatticeSpins {
 		this.setNumIterations(numIterations);
 		if(visual)
 			this.init();
-		PrintWriter writer;
-		writer = new PrintWriter("out/M_vs_E.dat", "UTF-8");
-		int count = 0;
-		double energyTotal = this.energyTotal();
 		for(int i=0; i<this.getNumIterations(); i++){
 			int[] randSite = this.getRandSite();
 			if(glauber){
@@ -286,46 +282,13 @@ public class LatticeSpins {
 				if(i % (this.getNumIterations() / numFrames) == 0){
 					if(visual)
 						this.update();
-					energyTotal = this.energyTotal();
-					writer.println(count + " " + energyTotal + " " + 
-							this.magnetisationTotal());
-					count += 1;
 				}
 			}else{
 				int[] randSite2 = this.getRandSite();
 				this.metropolisKawasaki(randSite, randSite2);
 				if(i % (this.getNumIterations() / numFrames) == 0){
 					this.update();
-					energyTotal = this.energyTotal();
-					writer.println(count + " " + energyTotal + " " + 
-							this.magnetisationTotal());	
-					count += 1;
 				}
-			}
-		}
-		writer.close();
-	}
-	
-	public void dynamical(PrintWriter writer, int numIterations, boolean glauber){
-		/*
-		 * get normalised magnetisation and energy
-		 * to normalise magnetisation: divide by N^2
-		 * to normalise energy: divide by 2JN^2 (the 
-		 * energy of an all up/down set of N by N spins
-		 * is E_max = - 2 * J * N^2
-		 */
-		for(int i=0; i<numIterations; i++){
-			int[] randSite = this.getRandSite();
-			if(glauber){
-				this.metropolisGlauber(randSite[0], randSite[1]);
-				writer.println(i + " " + this.energyTotal() / (2 * this.J * this.N * 
-						this.N) + " " + Math.abs(this.magnetisationTotal()) / 
-						(this.N * this.N));
-			}else{
-				int[] randSite2 = this.getRandSite();
-				this.metropolisKawasaki(randSite, randSite2);
-				writer.println(i + " " + this.energyTotal() + " " + 
-							Math.abs(this.magnetisationTotal()));	
 			}
 		}
 	}
@@ -477,14 +440,6 @@ public class LatticeSpins {
                     chi_sd[i] = chi_sig_c_sig[1];
                     c[i] = chi_sig_c_sig[2];
                     c_sd[i] = chi_sig_c_sig[3];
-					/*writer.println(this.T + " " + 							// 1. Temperature
-							this.energyTotal()/(2*N2*this.J) + " " + 		// 2. Normalised energy
-							Math.abs(this.magnetisationTotal())/N2 + 		// 3. Normalised magnetisation
-							" " + chi_sig_c_sig[0] + " " + 					// 4. Magnetic susceptibility (chi)
-							chi_sig_c_sig[1] + " " + 						// 5. Error in chi 
-							chi_sig_c_sig[2] + " " +						// 6. Specific heat (c = Cv / N)
-							chi_sig_c_sig[3]);								// 7. Error in c
-                    */
 				}
                 for(int i=0; i<dataPoints; i++){
                     writer.println(temperature[i] + " " +   // 1. Temperature
@@ -501,8 +456,7 @@ public class LatticeSpins {
 				double[] c_sig = new double[2];
 				double c_max = 0., c_aux = 0., Tc_c = 0.;
                 double[] temperature = new double[dataPoints], energy = new double[dataPoints],
-                            magnetisation = new double[dataPoints], chi = new double[dataPoints], 
-                            chi_sd = new double[dataPoints], c = new double[dataPoints], 
+                            magnetisation = new double[dataPoints], c = new double[dataPoints], 
                             c_sd = new double[dataPoints];
 				for(int i=0; i<dataPoints; i++){
 					this.T = maxT - i * (maxT - minT)/(dataPoints-1);
@@ -519,14 +473,6 @@ public class LatticeSpins {
                     magnetisation[i] = Math.abs(this.magnetisationTotal())/N2;
                     c[i] = c_sig[0];
                     c_sd[i] = c_sig[1];
-					/*writer.println(this.T + " " + 							// 1. Temperature
-							this.energyTotal()/(2*N2*this.J) +				// 2. Normalised energy
-							" " + Math.abs(this.magnetisationTotal())/N2 +	// 3. Normalised magnetisation
-							" " + 0 + " " + 								// 4. Magnetic susceptibility (chi)
-							0 + " " + 										// 5. Error in chi
-							c_sig[0] + " " +								// 6. Specific heat (c = Cv / N)
-							c_sig[1]);										// 7. Error in c
-                    */
 				}
                 for(int i=0; i<dataPoints; i++){
                     writer.println(temperature[i] + " " +   // 1. Temperature
