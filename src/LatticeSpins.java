@@ -268,7 +268,6 @@ public class LatticeSpins {
 					throws FileNotFoundException, UnsupportedEncodingException{
 		/*
 		 * loops over numIterations with the desired dynamics
-		 * writes E and M into the out/M_vs_E.dat file.
 		 */
 		this.startRandom();
 		int numFrames = 1000;
